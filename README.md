@@ -65,13 +65,13 @@ Some important features used:
 ---
 
 ### 4️⃣ Model Building
+Models experimented with:
+- Logistic Regression ✅ (Final Model)
+- Random Forest
+- Gradient Boosting
+- XGBoost
 
-Models tried:
-
-* Logistic Regression ✅
-* Random Forest ❌
-* Gradient Boosting ❌
-
+All models were evaluated using accuracy, precision, recall, and macro F1-score.
 ---
 
 ### 5️⃣ Model Tuning
@@ -116,12 +116,12 @@ Class 1 (Approved): Precision = 0.87, Recall = 0.79, F1 = 0.83
 ---
 
 ## 📈 Key Insights
-
-* Logistic Regression outperformed complex models due to dataset simplicity
-* Handling class imbalance significantly improved fairness
-* Regularization (C=0.5) improved generalization
-* Cross-validation ensured model stability
-
+- Multiple models were tested including Logistic Regression, Random Forest, Gradient Boosting, and XGBoost  
+- Logistic Regression performed best due to the dataset’s small size and mostly linear relationships  
+- Tree-based models (RF, GB, XGBoost) showed lower or unstable performance, likely due to overfitting  
+- Handling class imbalance significantly improved model fairness  
+- Regularization (C=0.5) improved generalization  
+- Cross-validation ensured model stability  
 ---
 
 ## ⚠️ Challenges
