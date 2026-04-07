@@ -1,164 +1,144 @@
-# 🏦 Loan Prediction ML Project
+# =========================
+# 📦 IMPORT LIBRARIES
+# =========================
+import pandas as pd
+import numpy as np
 
-## 📌 Overview
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report, confusion_matrix
 
-This project focuses on building a Machine Learning model to predict whether a loan application will be **approved or rejected** based on applicant details.
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 
-The dataset is sourced from Kaggle and includes features such as income, loan amount, credit history, and more.
+from xgboost import XGBClassifier
 
----
+# =========================
+# 📂 LOAD DATA
+# =========================
+df = pd.read_csv('/kaggle/input/datasets/ninzaami/loan-predication/train_u6lujuX_CVtuZ9i (1).csv')  # change path if needed
 
-## 🎯 Problem Statement
+# =========================
+# 🧹 DATA PREPROCESSING
+# =========================
 
-Predict the **Loan Status**:
+# Drop ID column
+if 'Loan_ID' in df.columns:
+    df.drop('Loan_ID', axis=1, inplace=True)
 
-* `1` → Approved
-* `0` → Rejected
+# Handle missing values
+for col in df.columns:
+    if df[col].dtype == 'object':
+        df[col].fillna(df[col].mode()[0], inplace=True)
+    else:
+        df[col].fillna(df[col].median(), inplace=True)
 
-This is a **binary classification problem**.
+# Encode categorical variables
+le = LabelEncoder()
+for col in df.columns:
+    if df[col].dtype == 'object':
+        df[col] = le.fit_transform(df[col])
 
----
+# =========================
+# 🎯 SPLIT DATA
+# =========================
+X = df.drop('Loan_Status', axis=1)
+y = df['Loan_Status']
 
-## 📂 Dataset Features
-
-Some important features used:
-
-* ApplicantIncome
-* CoapplicantIncome
-* LoanAmount
-* Credit_History
-* Gender, Education, Property_Area
-
----
-
-## 🛠️ Tech Stack
-
-* Python 🐍
-* Pandas, NumPy
-* Matplotlib, Seaborn
-* Scikit-learn
-* XGBoost
-
----
-
-## 🔍 Approach
-
-### 1️⃣ Data Preprocessing
-
-* Handled missing values
-* Encoded categorical variables
-* Removed unnecessary columns (e.g., Loan_ID)
-
----
-
-### 2️⃣ Exploratory Data Analysis (EDA)
-
-* Analyzed feature distributions
-* Checked class imbalance
-* Studied relationship with target variable
-
----
-
-### 3️⃣ Handling Imbalance
-
-* Used class balancing techniques
-* Evaluated models using macro F1-score
-
----
-
-### 4️⃣ Model Building
-
-Models experimented with:
-
-* Logistic Regression
-* Random Forest
-* Gradient Boosting
-* XGBoost ✅ (Final Model)
-
----
-
-### 5️⃣ Model Tuning
-
-* Hyperparameter tuning using GridSearchCV
-* Cross-validation using Stratified K-Fold
-* Optimized parameters like:
-
-  * learning_rate
-  * max_depth
-  * n_estimators
-
----
-
-## 🏆 Final Model
-
-**XGBoost Classifier**
-
-```python id="u7yqzp"
-XGBClassifier(
-    n_estimators=150,
-    max_depth=3,
-    learning_rate=0.05,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    eval_metric='logloss',
-    random_state=42
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
-```
 
----
+# =========================
+# 🤖 MODELS
+# =========================
+models = {
+    "Logistic Regression": LogisticRegression(
+        penalty='l2',
+        C=0.5,
+        class_weight='balanced',
+        random_state=42,
+        max_iter=200
+    ),
+    
+    "Random Forest": RandomForestClassifier(
+        n_estimators=200,
+        max_depth=4,
+        min_samples_split=10,
+        class_weight='balanced',
+        random_state=42
+    ),
+    
+    "Gradient Boosting": GradientBoostingClassifier(
+        n_estimators=100,
+        learning_rate=0.05,
+        max_depth=3,
+        random_state=42
+    ),
+    
+    "XGBoost": XGBClassifier(
+        n_estimators=150,
+        max_depth=3,
+        learning_rate=0.05,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        eval_metric='logloss',
+        random_state=42
+    )
+}
 
-## 📊 Final Results
+# =========================
+# 📊 TRAIN & EVALUATE
+# =========================
+for name, model in models.items():
+    print(f"\n{'='*50}")
+    print(f"Model: {name}")
+    print(f"{'='*50}")
+    
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    print("\nClassification Report:")
+    print(classification_report(y_test, y_pred))
+    
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
 
-| Metric         | Score    |
-| -------------- | -------- |
-| Accuracy       | **0.85** |
-| Macro F1 Score | **0.81** |
+# =========================
+# 🔍 CROSS VALIDATION (FINAL LR)
+# =========================
+print("\n" + "="*50)
+print("Final Model: Logistic Regression with CV")
+print("="*50)
 
-### Classification Report:
+final_model = LogisticRegression(
+    penalty='l2',
+    C=0.5,
+    class_weight='balanced',
+    random_state=42,
+    max_iter=200
+)
 
-```id="3q0hvt"
-Class 0 (Rejected): Precision = 0.88, Recall = 0.61, F1 = 0.72  
-Class 1 (Approved): Precision = 0.85, Recall = 0.96, F1 = 0.90  
-```
-## 📊 Confusion Matrix
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-![Confusion Matrix](confusion_matrix.png)
----
+from sklearn.model_selection import cross_val_score
 
-## 📈 Key Insights
+scores = cross_val_score(final_model, X, y, cv=cv, scoring='f1_macro')
 
-* Multiple models were tested including Logistic Regression, Random Forest, Gradient Boosting, and XGBoost
-* XGBoost achieved the best overall performance with highest macro F1-score
-* It minimized false negatives, which is critical in loan approval systems
-* Tree-based models performed better after tuning
-* Cross-validation ensured model stability and reliability
+print("F1 scores:", scores)
+print("Average F1 score:", scores.mean())
 
----
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
-## ⚠️ Challenges
+cm = confusion_matrix(y_test, y_pred)
 
-* Imbalanced dataset
-* Small dataset size
-* Initial model bias toward majority class
+plt.figure()
+sns.heatmap(cm, annot=True, fmt='d')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix - XGBoost')
 
----
-
-## 🚀 Future Improvements
-
-* Apply SMOTE for further imbalance handling
-* Feature engineering (income ratios, etc.)
-* Model deployment using Flask/Streamlit
-* Add explainability (SHAP values for XGBoost)
-
----
-
-## 💡 Conclusion
-
-After evaluating multiple models, XGBoost provided the best balance between accuracy and recall, making it the most suitable model for loan approval prediction.
-
----
-
-## 🙌 Author
-
-**Keerthi**
-GitHub: https://github.com/allianceprokeerthi-cmd
+plt.savefig('confusion_matrix.png')  # saves image
+plt.show()
