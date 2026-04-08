@@ -3,20 +3,21 @@
 # =========================
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-
 from xgboost import XGBClassifier
 
 # =========================
 # 📂 LOAD DATA
 # =========================
-df = pd.read_csv('/kaggle/input/datasets/ninzaami/loan-predication/train_u6lujuX_CVtuZ9i (1).csv')  # change path if needed
+df = pd.read_csv('/kaggle/input/datasets/ninzaami/loan-predication/train_u6lujuX_CVtuZ9i (1).csv')
 
 # =========================
 # 🧹 DATA PREPROCESSING
@@ -54,41 +55,29 @@ X_train, X_test, y_train, y_test = train_test_split(
 # =========================
 models = {
     "Logistic Regression": LogisticRegression(
-        penalty='l2',
-        C=0.5,
-        class_weight='balanced',
-        random_state=42,
-        max_iter=200
+        penalty='l2', C=0.5, class_weight='balanced',
+        random_state=42, max_iter=200
     ),
     
     "Random Forest": RandomForestClassifier(
-        n_estimators=200,
-        max_depth=4,
-        min_samples_split=10,
-        class_weight='balanced',
-        random_state=42
+        n_estimators=200, max_depth=4, min_samples_split=10,
+        class_weight='balanced', random_state=42
     ),
     
     "Gradient Boosting": GradientBoostingClassifier(
-        n_estimators=100,
-        learning_rate=0.05,
-        max_depth=3,
-        random_state=42
+        n_estimators=100, learning_rate=0.05,
+        max_depth=3, random_state=42
     ),
     
     "XGBoost": XGBClassifier(
-        n_estimators=150,
-        max_depth=3,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        eval_metric='logloss',
-        random_state=42
+        n_estimators=150, max_depth=3, learning_rate=0.05,
+        subsample=0.8, colsample_bytree=0.8,
+        eval_metric='logloss', random_state=42
     )
 }
 
 # =========================
-# 📊 TRAIN & EVALUATE
+# 📊 TRAIN, EVALUATE & PLOT
 # =========================
 for name, model in models.items():
     print(f"\n{'='*50}")
@@ -98,47 +87,37 @@ for name, model in models.items():
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     
+    # Classification Report
     print("\nClassification Report:")
     print(classification_report(y_test, y_pred))
     
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test, y_pred))
+    # Confusion Matrix
+    cm = confusion_matrix(y_test, y_pred)
+    print("Confusion Matrix:\n", cm)
+    
+    # Plot Confusion Matrix
+    plt.figure()
+    sns.heatmap(cm, annot=True, fmt='d')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title(f'Confusion Matrix - {name}')
+    plt.show()
 
 # =========================
-# 🔍 CROSS VALIDATION (FINAL LR)
+# 🔍 CROSS VALIDATION (FINAL MODEL)
 # =========================
 print("\n" + "="*50)
 print("Final Model: Logistic Regression with CV")
 print("="*50)
 
 final_model = LogisticRegression(
-    penalty='l2',
-    C=0.5,
-    class_weight='balanced',
-    random_state=42,
-    max_iter=200
+    penalty='l2', C=0.5, class_weight='balanced',
+    random_state=42, max_iter=200
 )
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
-from sklearn.model_selection import cross_val_score
 
 scores = cross_val_score(final_model, X, y, cv=cv, scoring='f1_macro')
 
 print("F1 scores:", scores)
 print("Average F1 score:", scores.mean())
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
-
-cm = confusion_matrix(y_test, y_pred)
-
-plt.figure()
-sns.heatmap(cm, annot=True, fmt='d')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.title('Confusion Matrix - XGBoost')
-
-plt.savefig('confusion_matrix.png')  # saves image
-plt.show()
