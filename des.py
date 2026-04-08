@@ -1,6 +1,5 @@
-# =========================
-# 📦 IMPORT LIBRARIES
-# =========================
+# IMPORT LIBRARIES
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,14 +13,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 
-# =========================
-# 📂 LOAD DATA
-# =========================
+# LOAD DATA
+
 df = pd.read_csv('/kaggle/input/datasets/ninzaami/loan-predication/train_u6lujuX_CVtuZ9i (1).csv')
 
-# =========================
-# 🧹 DATA PREPROCESSING
-# =========================
+# DATA PREPROCESSING
 
 # Drop ID column
 if 'Loan_ID' in df.columns:
@@ -40,19 +36,18 @@ for col in df.columns:
     if df[col].dtype == 'object':
         df[col] = le.fit_transform(df[col])
 
-# =========================
-# 🎯 SPLIT DATA
-# =========================
+
+# SPLIT DATA
+
 X = df.drop('Loan_Status', axis=1)
 y = df['Loan_Status']
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+    X, y, test_size=0.2, random_state=42,)
 
-# =========================
-# 🤖 MODELS
-# =========================
+ 
+#  MODELS
+ 
 models = {
     "Logistic Regression": LogisticRegression(
         penalty='l2', C=0.5, class_weight='balanced',
@@ -76,9 +71,9 @@ models = {
     )
 }
 
-# =========================
-# 📊 TRAIN, EVALUATE & PLOT
-# =========================
+ 
+#  TRAIN, EVALUATE & PLOT
+ 
 for name, model in models.items():
     print(f"\n{'='*50}")
     print(f"Model: {name}")
@@ -103,9 +98,9 @@ for name, model in models.items():
     plt.title(f'Confusion Matrix - {name}')
     plt.show()
 
-# =========================
-# 🔍 CROSS VALIDATION (FINAL MODEL)
-# =========================
+ 
+# CROSS VALIDATION (FINAL MODEL)
+ 
 print("\n" + "="*50)
 print("Final Model: Logistic Regression with CV")
 print("="*50)
