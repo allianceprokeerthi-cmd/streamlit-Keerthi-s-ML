@@ -141,7 +141,7 @@ XGBClassifier(
 
 ## 📊 Confusion Matrix
 
-![Confusion Matrix](confusion_matrix.png)
+![Confusion Matrix](confusion_matrix_XGBoost.png)
 
 ---
 
@@ -175,7 +175,7 @@ Rejecting eligible applicants may reduce customer satisfaction and business oppo
 * The model achieves high recall for approved loans
 * Most eligible applicants are correctly identified
 * Some risky applicants may still be approved
-* The model shows a slight bias toward loan approvals, which may be acceptable depending on business objectives
+* The model shows a slight bias toward approving loans, which may be acceptable depending on business objectives
 
 ---
 
@@ -183,7 +183,7 @@ Rejecting eligible applicants may reduce customer satisfaction and business oppo
 
 * XGBoost outperformed all other models
 * Tree-based models handled feature interactions effectively
-* Credit history was the most influential feature in loan approval prediction
+* Credit history was a major factor in loan approval prediction
 * Cross-validation improved evaluation reliability
 * Macro F1-score helped evaluate performance fairly across both classes
 
@@ -199,7 +199,7 @@ Rejecting eligible applicants may reduce customer satisfaction and business oppo
 
 ## 💡 Conclusion
 
-After comparing multiple Machine Learning models, **XGBoost achieved the best balance between accuracy and classification performance**.
+After comparing multiple Machine Learning models, **XGBoost achieved the best balance between accuracy, recall, and overall classification performance**.
 
 This project demonstrates a complete Machine Learning workflow including:
 
@@ -208,7 +208,6 @@ This project demonstrates a complete Machine Learning workflow including:
 * Model training
 * Cross-validation
 * Performance evaluation
-* Feature importance analysis
 
 ---
 
