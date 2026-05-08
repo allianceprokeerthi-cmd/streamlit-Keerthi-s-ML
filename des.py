@@ -1,6 +1,6 @@
-# ==============================
+# ==========================================
 # IMPORT LIBRARIES
-# ==============================
+# ==========================================
 
 import pandas as pd
 import numpy as np
@@ -23,6 +23,7 @@ from sklearn.metrics import (
 )
 
 from sklearn.linear_model import LogisticRegression
+
 from sklearn.ensemble import (
     RandomForestClassifier,
     GradientBoostingClassifier
@@ -30,30 +31,30 @@ from sklearn.ensemble import (
 
 from xgboost import XGBClassifier
 
-# ==============================
+# ==========================================
 # LOAD DATA
-# ==============================
+# ==========================================
 
 df = pd.read_csv(
     '/kaggle/input/datasets/ninzaami/loan-predication/train_u6lujuX_CVtuZ9i (1).csv'
 )
 
-# ==============================
+# ==========================================
 # DATA PREPROCESSING
-# ==============================
+# ==========================================
 
 # Drop Loan_ID column
 if 'Loan_ID' in df.columns:
     df.drop('Loan_ID', axis=1, inplace=True)
 
-# Handle missing values
+# Handle Missing Values
 for col in df.columns:
 
-    # For categorical columns
+    # Categorical columns
     if df[col].dtype == 'object':
         df[col] = df[col].fillna(df[col].mode()[0])
 
-    # For numerical columns
+    # Numerical columns
     else:
         df[col] = df[col].fillna(df[col].median())
 
@@ -65,16 +66,16 @@ for col in df.columns:
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col])
 
-# ==============================
+# ==========================================
 # FEATURES & TARGET
-# ==============================
+# ==========================================
 
 X = df.drop('Loan_Status', axis=1)
 y = df['Loan_Status']
 
-# ==============================
+# ==========================================
 # TRAIN TEST SPLIT
-# ==============================
+# ==========================================
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -84,9 +85,9 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-# ==============================
+# ==========================================
 # MODELS
-# ==============================
+# ==========================================
 
 models = {
 
@@ -119,9 +120,9 @@ models = {
     )
 }
 
-# ==============================
+# ==========================================
 # TRAIN & EVALUATE MODELS
-# ==============================
+# ==========================================
 
 for name, model in models.items():
 
@@ -154,7 +155,10 @@ for name, model in models.items():
     print("Confusion Matrix:\n")
     print(cm)
 
-    # Plot Confusion Matrix
+    # ==========================================
+    # PLOT CONFUSION MATRIX
+    # ==========================================
+
     plt.figure(figsize=(5, 4))
 
     sns.heatmap(
@@ -170,11 +174,26 @@ for name, model in models.items():
     plt.ylabel("Actual")
     plt.title(f"Confusion Matrix - {name}")
 
+    # ==========================================
+    # SAVE CONFUSION MATRIX AS PNG
+    # ==========================================
+
+    file_name = f"confusion_matrix_{name}.png"
+
+    plt.savefig(
+        file_name,
+        bbox_inches='tight',
+        dpi=300
+    )
+
+    print(f"\nSaved: {file_name}")
+
+    # Show Plot
     plt.show()
 
-# ==============================
+# ==========================================
 # FINAL MODEL - XGBOOST
-# ==============================
+# ==========================================
 
 print("\n" + "="*60)
 print("FINAL MODEL : XGBOOST WITH CROSS VALIDATION")
@@ -190,13 +209,14 @@ final_model = XGBClassifier(
     random_state=42
 )
 
-# Cross Validation
+# Stratified K-Fold
 cv = StratifiedKFold(
     n_splits=5,
     shuffle=True,
     random_state=42
 )
 
+# Cross Validation Scores
 scores = cross_val_score(
     final_model,
     X,
@@ -210,34 +230,5 @@ print(scores)
 
 print(f"\nAverage F1 Macro Score : {scores.mean():.4f}")
 
-# ==============================
-# FEATURE IMPORTANCE
-# ==============================
 
-# Train final model
-final_model.fit(X_train, y_train)
 
-# Create importance dataframe
-importance = pd.DataFrame({
-    'Feature': X.columns,
-    'Importance': final_model.feature_importances_
-})
-
-# Sort values
-importance = importance.sort_values(
-    by='Importance',
-    ascending=False
-)
-
-# Plot Feature Importance
-plt.figure(figsize=(8, 5))
-
-sns.barplot(
-    data=importance,
-    x='Importance',
-    y='Feature'
-)
-
-plt.title("Feature Importance - XGBoost")
-
-plt.show()
