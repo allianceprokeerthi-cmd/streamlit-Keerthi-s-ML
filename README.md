@@ -140,8 +140,10 @@ XGBClassifier(
 ---
 
 ## 📊 Confusion Matrix
+<p align="center">
+  <img src="confusion_matrix_XGBoost.png" width="500">
+</p>
 
-![Confusion Matrix](confusion_matrix_XGBoost.png)
 
 ---
 
